@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Minutes to Actions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --fg: #171c26; --muted: #5b6475; --line: #dde1e8;
+  --accent: #2748c7; --accent-soft: #e8ecfb; --warn: #9a5b00; --warn-soft: #fbf1dc;
+  --display: "Space Grotesk", "Inter", system-ui, sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12151c; --surface: #1a1f29; --fg: #e9ecf2; --muted: #9aa3b4; --line: #2c3340;
+    --accent: #8fa6ff; --accent-soft: #212a4a; --warn: #f0be6a; --warn-soft: #33290f;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 40px 16px 56px; display: flex; flex-direction: column; gap: 40px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: 2rem; font-weight: 600; letter-spacing: -0.01em; }
+h2 { font-size: 1.25rem; font-weight: 600; }
+h3 { font-size: 1rem; font-weight: 600; }
+p { margin: 0; }
+.lede { color: var(--muted); font-size: 1.0625rem; max-width: 60ch; }
+.eyebrow { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+header, section { display: flex; flex-direction: column; gap: 14px; }
+.num { font-variant-numeric: tabular-nums; }
+.equation { background: var(--accent-soft); border-radius: 10px; padding: 20px; font-family: var(--display); font-weight: 600; font-size: 1.375rem; line-height: 1.3; color: var(--fg); }
+.equation span { color: var(--accent); }
+.calc { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 18px; }
+.stepper-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.stepper-row label { font-weight: 500; flex: 1 1 220px; min-width: 0; }
+.stepper { display: inline-flex; align-items: center; gap: 4px; }
+.stepper button { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font: 600 1.125rem var(--body); cursor: pointer; }
+.stepper button:hover { border-color: var(--accent); color: var(--accent); }
+.stepper button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.stepper output { min-width: 44px; text-align: center; font: 600 1.25rem var(--display); font-variant-numeric: tabular-nums; }
+.results { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; border-top: 1px solid var(--line); padding-top: 18px; }
+.results div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.results .v { font: 600 1.375rem var(--display); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.results .k { font-size: 0.8125rem; color: var(--muted); }
+.drift { border-top: 1px solid var(--line); padding-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+.drift p { color: var(--muted); }
+.drift strong { color: var(--fg); font-variant-numeric: tabular-nums; }
+ul { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 6px; }
+.options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.option { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.option .tag { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.option .tradeoff { color: var(--muted); font-size: 0.9375rem; }
+.note { background: var(--warn-soft); color: var(--warn); border-radius: 8px; padding: 12px 14px; font-size: 0.9375rem; }
+.caption { color: var(--muted); font-size: 0.9375rem; }
+.quota { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+.quota .total { font-size: 1.0625rem; font-variant-numeric: tabular-nums; }
+.quota .used { color: var(--accent); }
+.quota .bar { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.quota .bar i { display: block; height: 100%; width: 33%; background: var(--accent); border-radius: 4px; }
+.qgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.qbox { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; min-width: 0; display: flex; flex-direction: column; }
+.qhead { background: var(--bg); padding: 10px 16px; font-weight: 600; border-bottom: 1px solid var(--line); }
+.qcell { padding: 16px; display: flex; flex-wrap: wrap; gap: 16px 28px; flex: 1; }
+.qcell + .qcell { border-top: 1px solid var(--line); }
+.qcell div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.qcell .k { font-size: 0.8125rem; color: var(--muted); }
+.qcell .v { font: 600 1.375rem var(--body); font-variant-numeric: tabular-nums; }
+.qcell .s { font-size: 0.8125rem; color: var(--muted); }
+@media (max-width: 560px) {
+  h1 { font-size: 1.625rem; }
+  .results, .options, .qgrid { grid-template-columns: minmax(0, 1fr); }
+  .equation { font-size: 1.125rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Video moderation pricing · internal</p>
+    <h1>Minutes to Actions</h1>
+    <p class="lede">The contract is in video minutes. The product meters moderation actions.</p>
+  </header>
+
+  <section>
+    <h2>The conversion</h2>
+    <div class="equation">1 moderation action = <span>10 seconds of video</span> × <span>1 rule</span></div>
+    <ul>
+      <li>30-second video × 5 rules = <strong>15 actions</strong>.</li>
+      <li>Contract: <strong class="num">23,750 minutes a month</strong> (<span class="num">285,000</span> a year), with no number of rules.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Size the bucket</h2>
+    <div class="calc">
+      <div class="stepper-row">
+        <label id="lblRules">Rules the bucket is sized for</label>
+        <div class="stepper" role="group" aria-labelledby="lblRules">
+          <button type="button" id="rulesDown" aria-label="Fewer rules">−</button>
+          <output id="rulesOut">5</output>
+          <button type="button" id="rulesUp" aria-label="More rules">+</button>
+        </div>
+      </div>
+      <div class="results">
+        <div><span class="v" id="perMin">30</span><span class="k">actions per video minute</span></div>
+        <div><span class="v" id="perMonth">712,500</span><span class="k">actions per month</span></div>
+        <div><span class="v" id="perYear">8,550,000</span><span class="k">actions in the yearly bucket</span></div>
+      </div>
+      <div class="drift">
+        <div class="stepper-row">
+          <label id="lblRun">Rules they actually run</label>
+          <div class="stepper" role="group" aria-labelledby="lblRun">
+            <button type="button" id="runDown" aria-label="Fewer rules running">−</button>
+            <output id="runOut">5</output>
+            <button type="button" id="runUp" aria-label="More rules running">+</button>
+          </div>
+        </div>
+        <p id="driftText"></p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What the customer will see by launch (Nov 22)</h2>
+    <p class="note">Today they see only moderation actions.</p>
+    <div class="quota">
+      <h3>Quota usage</h3>
+      <p class="total"><strong>1,324,151</strong> of 4,000,000 moderation actions · <span class="used">33% used</span></p>
+      <div class="bar"><i></i></div>
+      <h3>Usage breakdown</h3>
+      <div class="qgrid">
+        <div class="qbox">
+          <div class="qhead">Images</div>
+          <div class="qcell"><div><span class="k">Images moderated</span><span class="v">412,050</span></div></div>
+          <div class="qcell"><div><span class="k">Moderation actions used</span><span class="v">1,252,151</span></div></div>
+        </div>
+        <div class="qbox">
+          <div class="qhead">Video</div>
+          <div class="qcell">
+            <div><span class="k">Videos moderated</span><span class="v">1,284</span></div>
+            <div><span class="k">Video seconds moderated</span><span class="v">240,000 sec</span><span class="s">(66h 40m)</span></div>
+          </div>
+          <div class="qcell"><div><span class="k">Moderation actions used</span><span class="v">72,000</span></div></div>
+        </div>
+      </div>
+    </div>
+    <p class="caption">Example numbers: 240,000 sec ÷ 10 × 3 rules = 72,000 actions.</p>
+  </section>
+
+  <section>
+    <h2>Two ways to set their actions</h2>
+    <div class="options">
+      <div class="option">
+        <span class="tag">Option A</span>
+        <h3>We size it and adjust as rules change</h3>
+        <p>They keep thinking in minutes. We raise the bucket when they add rules.</p>
+        <p class="tradeoff">No ceiling on rules. Someone must tell Moderation when rules change.</p>
+      </div>
+      <div class="option">
+        <span class="tag">Option B</span>
+        <h3>We agree on a number of rules</h3>
+        <p>We explain the conversion and fix the bucket at an agreed rule count. Their actions are clear to them.</p>
+        <p class="tradeoff">Opens a minutes versus actions conversation on a contract written in minutes.</p>
+      </div>
+    </div>
+    <p class="note">Before signing: two checks, nudity and weapons. The launch list is longer.</p>
+  </section>
+</div>
+
+<script>
+(function () {
+  var YEAR_MIN = 285000, MONTH_MIN = 23750, MIN_R = 1, MAX_R = 15;
+  var sized = 5, run = 5;
+  var fmt = function (n) { return Math.round(n).toLocaleString('en-US'); };
+  var $ = function (id) { return document.getElementById(id); };
+  function render() {
+    $('rulesOut').textContent = sized;
+    $('runOut').textContent = run;
+    $('perMin').textContent = fmt(6 * sized);
+    $('perMonth').textContent = fmt(MONTH_MIN * 6 * sized);
+    $('perYear').textContent = fmt(YEAR_MIN * 6 * sized);
+    var t = $('driftText');
+    if (run === sized) {
+      t.innerHTML = 'The bucket covers the full <strong>285,000</strong> contract minutes.';
+    } else if (run > sized) {
+      var covered = YEAR_MIN * sized / run;
+      t.innerHTML = 'The bucket runs out after <strong>' + fmt(covered) + '</strong> of the 285,000 contract minutes (' +
+        Math.round(covered / YEAR_MIN * 100) + '%). To cover them all it needs <strong>' + fmt(YEAR_MIN * 6 * run) + '</strong> actions.';
+    } else {
+      t.innerHTML = 'The bucket covers all 285,000 contract minutes and leaves <strong>' +
+        fmt(YEAR_MIN * 6 * (sized - run)) + '</strong> actions unused.';
+    }
+  }
+  function clamp(n) { return Math.max(MIN_R, Math.min(MAX_R, n)); }
+  $('rulesDown').addEventListener('click', function () { sized = clamp(sized - 1); render(); });
+  $('rulesUp').addEventListener('click', function () { sized = clamp(sized + 1); render(); });
+  $('runDown').addEventListener('click', function () { run = clamp(run - 1); render(); });
+  $('runUp').addEventListener('click', function () { run = clamp(run + 1); render(); });
+  render();
+})();
+</script>
+</body>
+</html>
